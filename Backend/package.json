@@ -1,0 +1,25 @@
+{
+  "name": "tobchat",
+  "version": "1.0.0",
+  "description": "learn js - with an easy chat app - this is the backend",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "tobcraft"
+  ],
+  "author": "tobcraft",
+  "license": "ISC",
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "csv": "^6.1.2",
+    "express": "^4.18.1",
+    "googleapis": "^103.0.0",
+    "js-sha256": "^0.9.0",
+    "nodemailer": "^6.7.5",
+    "querystring": "^0.2.1",
+    "socket.io": "^4.5.1",
+    "ws": "^8.8.0"
+  }
+}

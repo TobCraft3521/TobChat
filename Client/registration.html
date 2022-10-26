@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TobChat :D - Registration</title>
+    <script src="cookies.js"></script>
+    <link rel="stylesheet" href="css/index.css">
+    <script src="socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <header>
+        <img src="http://tobcraft.xyz/imgs/icon.png" alt="">
+        <p> TobChat</p>
+    </header>
+    <div id="content">
+        <form id="registerForm">
+            <h2>Registration</h2>
+            <div id="inputs">
+                <br>
+                <div>Username</div>
+                <input type="text" id="username" class="inp" placeholder="Username">
+                <br>
+                <br>
+                <div>Email</div>
+                <input type="email" id="email" class="inp" placeholder="Email">
+                <br>
+                <br>
+                <div>Avatar-link</div>
+                <input type="url" id="avatar" class="inp" placeholder="A link to your Profilepicture">
+                <br>
+                <br>
+                <div>Password</div>
+                <input type="password" id="pass" class="inp" placeholder="Password">
+                <br>
+                <br>
+                <div>Repeat password</div>
+                <input type="password" id="repeatpass" class="inp" placeholder="Repeat password">
+                <br>
+            </div>
+            <h5 id="alert" style="color: #ff8800 "></h5>
+            <br>
+            <button id="registerBTN" class="btn1">Submit</button>
+        </form>
+    </div>
+</body>
+<script>
+
+    var socket = io()
+    socket.emit('setMode', "register")
+
+    // # # # # # # # # # # # # # # # # # # 
+    const nameHTML = document.getElementById("username")
+    const mailHTML = document.getElementById("email")
+    const avatarHTML = document.getElementById("avatar")
+    const passwordHTML = document.getElementById("pass")
+    const passwordConfirmHTML = document.getElementById("repeatpass")
+    const inputs = $("#inputs")
+    const errorHTML = document.getElementById("alert")
+    const codeInput = $('<input type="text" class="inp" placeholder="Authcode">')
+
+    let awaitMailCode = false
+    var data
+    // # # # # # # # # # # # # # # # # # # 
+
+    document.getElementById("registerBTN").addEventListener("click", (event) => {
+        console.log(event)
+        if (nameHTML.value != "" && mailHTML.value != "" && passwordHTML.value != "" && passwordHTML.value == passwordConfirmHTML.value && !(awaitMailCode)) {
+            data = {
+                name: nameHTML.value,
+                mail: mailHTML.value,
+                password: passwordHTML.value,
+                avatar: avatarHTML.value
+            }
+            socket.emit("register", JSON.stringify(data))
+            console.log(data)
+
+        } else if (awaitMailCode && codeInput.val() != "") {
+            socket.emit("mailCode", codeInput.val())
+        } else {
+            console.warn("Fail : Wrong Password")
+        }
+        event.preventDefault()
+    })
+
+    socket.on("mailandusernamevalidity", (type) => {
+        console.log(type)
+        if (type === "valid") {
+            inputs.html(codeInput)
+            errorHTML.innerText = "Please enter the authcode that you received by email"
+            awaitMailCode = true
+        } else if (type === "invalidusername") {
+            errorHTML.innerText = "This username has already been used. Pls choose another one"
+        } else if (type === "invalidmail") {
+            errorHTML.innerText = "This email has already been used. Pls choose another one"
+        } else if (type === "invalidmailandusername") {
+            errorHTML.innerText = "This email and this username have already been used. Pls choose two others"
+        }
+    })
+
+    socket.on("mailAuthFinished", (validCode) => {
+
+        if (validCode) {
+            errorHTML.innerText = "✅ Email verified."
+            inputs.html("")
+            const btn = document.getElementById("registerBTN")
+            btn.setAttribute("disabled", "")
+            btn.innerText = "Finish"
+            createCookie("username", data.username, 365)
+            createCookie("password", data.password, 365)
+            createCookie("mail", data.mail, 365)
+        } else {
+            errorHTML.innerText = "Yout auth-code isn't  correct! (Try again!)"
+            codeInput.value = ""
+        }
+    })
+</script>
+
+</html>
